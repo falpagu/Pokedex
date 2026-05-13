@@ -1,78 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokedex</title>
-        <link
+    <link
       rel="icon"
       type="icon"
       sizes="32x32"
       href="./assets/icon_logos/pokemon_logo_2.svg"
     />
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body onload="init()">
-
+  <body onload="init()">
     <header>
-        <nav>
-                <a class="navLogo" href="index.html" target="_blank" rel="noopener noreferrer">
-                <img src="./assets/icon_logos/pokemon_logo_1.svg" alt="pokemon logo">
-                <span>Pokedex</span>
-                </a>
-                
-                <form class="search">
-                  <input type="text" placeholder="search...">
-                  <button><img class="searchIcon" src="./assets/icon_logos/search_icon_white.svg"></button>
-                </form>
-        </nav>
+      <nav>
+        <a
+          class="navLogo"
+          href="index.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="./assets/icon_logos/pokemon_logo_1.svg"
+            alt="pokemon logo"
+          />
+
+          <span>Pokedex</span>
+        </a>
+        <input  type="text" id="searchInput" placeholder="search Pokémon..." />
+      </nav>
     </header>
-         
 
     <main>
-        <div class="pokeContainer" id="content"></div>
 
-     
+      <div id="spinner" class="spinner">
+        <div class="spinnerText">Loading ...</div>
+        <div class="spinner-sector spinner-sector-red"></div>
+        <div class="spinner-sector spinner-sector-blue"></div>
+        <div class="spinner-sector spinner-sector-green"></div>
+      </div>
 
-        
+      <div class="pokeContainer" id="content"></div>
 
-        <!-- <dialog>
-         <div>
-            <span>#${data.id}</span>
-            <h3>${data[i].name}</h3>
-          </div>
-          <img src="" alt="">
-          <button><img src="" ></button>
+      <dialog id="popUp"></dialog>
+      
+      <button onclick="loadPokemon()" class="morePoke"> more Pokémon ...</button>
 
-          <div>
-            <div>main</div>
-            <div>stats</div>
-            <div>evo chain</div>
-          </div>
-           <span>Height: ${data[i].height}</span>
-        <span>Weight: ${data[i].weight}</span>
-        <span>Abilities: ${data[i].abilities}</span>
-        </dialog>
-
-        -->
-    
-
-      </main>
-
-   
+    </main>
 
     <footer>
-        <div class="footerContainer">
-            <a href="https://developerakademie.com/" target="_blank"
-            ><img src="./assets/icon_logos/DevAkak-Logo.svg" alt="Developer Akademie Logo"
-            /></a>
-            <span>© 2026 Developer Akademie GmbH</span>
-        </div>
-
+      <div class="footerContainer">
+        <a href="https://developerakademie.com/" target="_blank"
+          ><img
+            src="./assets/icon_logos/DevAkak-Logo.svg"
+            alt="Developer Akademie Logo"
+        /></a>
+        <span>© 2026 Developer Akademie GmbH</span>
+      </div>
     </footer>
 
     <script src="./scripts/template.js"></script>
-    <script src="script.js"></script>  
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
