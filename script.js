@@ -1,6 +1,7 @@
 let allPokemon = [];
-
+let filteredPokemon = [];
 let currentIndex = 0;
+let popUp = document.getElementById("popUp");
 
 function init() {
   loadPokemon();
@@ -9,29 +10,66 @@ function init() {
 let offset = 0;
 let limit = 24;
 
-
 async function loadPokemon() {
-  let BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`;
-  document.getElementById("spinner").style.display = "flex";
-  let response = await fetch(BASE_URL);
-  let data = await response.json();
+  
+  showLoading(true);
+  let data = await fetchPokemonList();
+  let pokemonData = await loadAllPokemonDetails(data.results);
 
-  await renderPokemonDetails(data);
+  allPokemon.push(...pokemonData);
 
   renderPokemon();
-  document.getElementById("spinner").style.display = "none";
+
   offset += limit;
+
+  showLoading(false);
+  
 }
 
-async function renderPokemonDetails(data) {
-  for (let i = 0; i < data.results.length; i++) {
-    let pokemon = data.results[i];
+async function fetchPokemonList() {
+  let BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`;
 
-    let pokemonDetails = await fetch(pokemon.url);
-    let pokemonDetailInfo = await pokemonDetails.json();
+  let response = await fetch(BASE_URL);
 
-    allPokemon.push(pokemonDetailInfo);
+  return await response.json();
+}
+
+async function loadAllPokemonDetails(pokemonList) {
+  
+  let pokemonPromises = [];
+
+  for (let i = 0; i < pokemonList.length; i++) {
+    let pokemon = pokemonList[i];
+    let promise = loadPokemonDetails(pokemon.url);
+
+    pokemonPromises.push(promise);
   }
+  return await Promise.all(pokemonPromises);
+}
+
+async function loadPokemonDetails(url) {
+  
+  let response = await fetch(url);
+  let details = await response.json();
+
+  return {
+    id: details.id,
+    name: details.name,
+    image: details.sprites.front_default,
+    types: details.types,
+    height: details.height,
+    weight: details.weight,
+    abilities: details.abilities,
+    base_experience: details.base_experience,
+    stats: details.stats,
+    species: details.species
+  };
+}
+
+function showLoading(isLoading) {
+  
+  document.getElementById("moreBtn").disabled = isLoading;
+  document.getElementById("spinner").style.display = isLoading ? "flex" : "none";
 }
 
 function getAbilities(pokemon) {
@@ -48,6 +86,7 @@ function getAbilities(pokemon) {
 }
 
 function getStats(pokemon) {
+
   let statsHTML = "";
 
   for (let i = 0; i < pokemon.stats.length; i++) {
@@ -56,15 +95,7 @@ function getStats(pokemon) {
     let label = firstLetterUpperCase(statInfo.stat.name).replace(":", "");
     let value = statInfo.base_stat;
 
-    statsHTML += `
-    <div class="stat-row">
-      <span class="label">${label}</span>
-      <div class="bar">
-          <div class="fill" style="width: ${value}%"></div>
-      </div> 
-     
-    </div>
-    `;
+    statsHTML += getStatsTemplate(label, value);
   }
   return statsHTML;
 }
@@ -76,7 +107,8 @@ function renderPokemon() {
 
   for (let i = 0; i < allPokemon.length; i++) {
     let pokemon = allPokemon[i];
-    html += getPokemonTemplate(pokemon);
+    let color = getPokemonColor(pokemon);
+    html += getPokemonTemplate(pokemon, color);
   }
   contentRef.innerHTML = html;
 }
@@ -112,28 +144,31 @@ function getTypeColor(type) {
 }
 
 function getTypeIcon(type) {
+
+  const path = "./assets/icon_logos/";
+
   const icons = {
-    normal: "./assets/icon_logos/normal.svg",
-    fire: "./assets/icon_logos/fire.svg",
-    water: "./assets/icon_logos/water.svg",
-    electric: "./assets/icon_logos/electric.svg",
-    grass: "./assets/icon_logos/grass.svg",
-    ice: "./assets/icon_logos/ice.svg",
-    fighting: "./assets/icon_logos/fighting.svg",
-    poison: "./assets/icon_logos/poison.svg",
-    ground: "./assets/icon_logos/ground.svg",
-    flying: "./assets/icon_logos/flying.svg",
-    psychic: "./assets/icon_logos/psychic.svg",
-    bug: "./assets/icon_logos/bug.svg",
-    rock: "./assets/icon_logos/rock.svg",
-    ghost: "./assets/icon_logos/ghost.svg",
-    dragon: "./assets/icon_logos/dragon.svg",
-    dark: "./assets/icon_logos/dark.svg",
-    steel: "./assets/icon_logos/steel.svg",
-    fairy: "./assets/icon_logos/fairy.svg",
+    normal: `${path}normal.svg`,
+    fire: `${path}fire.svg`,
+    water: `${path}water.svg`,
+    electric: `${path}electric.svg`,
+    grass: `${path}grass.svg`,
+    ice: `${path}ice.svg`,
+    fighting: `${path}fighting.svg`,
+    poison: `${path}poison.svg`,
+    ground: `${path}ground.svg`,
+    flying: `${path}flying.svg`,
+    psychic: `${path}psychic.svg`,
+    bug: `${path}bug.svg`,
+    rock: `${path}rock.svg`,
+    ghost: `${path}ghost.svg`,
+    dragon: `${path}dragon.svg`,
+    dark: `${path}dark.svg`,
+    steel: `${path}steel.svg`,
+    fairy: `${path}fairy.svg`,
   };
 
-  return icons[type] || "icons/default.svg";
+  return icons[type] || `${path}default.svg`;
 }
 
 function renderTypes(pokemon) {
@@ -151,31 +186,53 @@ function renderTypes(pokemon) {
   return html;
 }
 
+function disabledMorePoke(input) {
+  document.getElementById("moreBtn").disabled = input.length > 0;
+}
+
 document.getElementById("searchInput").addEventListener("input", searchPokemon);
 
 function searchPokemon() {
+  
   let input = document.getElementById("searchInput").value.toLowerCase();
   let content = document.getElementById("content");
+  
+  disabledMorePoke(input);
 
   let html = "";
+
+  filteredPokemon = [];
 
   for (let i = 0; i < allPokemon.length; i++) {
     let pokemon = allPokemon[i];
 
     if (pokemon.name.toLowerCase().includes(input)) {
-      html += getPokemonTemplate(pokemon);
+      filteredPokemon.push(pokemon);
+      let color = getPokemonColor(pokemon);
+      html += getPokemonTemplate(pokemon, color);
     }
   }
   content.innerHTML = html;
 }
 
+function getPokemonColor(pokemon) {
+  let mainType = pokemon.types[0].type.name;
+
+  return getTypeColor(mainType);
+  
+}
+
 async function openPopUp(id) {
-  let pokemon = allPokemon.find((p) => p.id === id);
 
-  currentIndex = allPokemon.findIndex((p) => p.id === id);
+  let currentList = filteredPokemon.length > 0 ? filteredPokemon : allPokemon;
 
-  let popUp = document.getElementById("popUp");
-  popUp.innerHTML = getDialogTemplate(pokemon);
+  let pokemon = currentList.find((p) => p.id === id);
+
+  currentIndex = currentList.findIndex((p) => p.id === id);
+
+  let color = getPokemonColor(pokemon);
+
+  popUp.innerHTML = getDialogTemplate(pokemon, color);
 
   popUp.showModal();
   popUp.focus();
@@ -190,7 +247,7 @@ async function loadEvolutionChain(pokemon) {
   let evolutionResponse = await fetch(speciesData.evolution_chain.url);
   let evolutionData = await evolutionResponse.json();
 
-  let evolutions = [];
+  let evolutions = []; 
 
   getEvolutionNames(evolutionData.chain, evolutions);
   renderEvolutionChain(evolutions);
@@ -214,13 +271,15 @@ function renderEvolutionChain(evolutions) {
     let evoPokemon = allPokemon.find((p) => p.name === evolutions[i]);
 
     if (evoPokemon) {
-      html += getEvosTemplate(evoPokemon, i, evolutions);
+      html += getEvosTemplate(evoPokemon);
+
+      if (i < evolutions.length - 1) {
+        html += `<img class="evoArrow" src="./assets/icon_logos/arrow_double.svg" alt="arrow left"/>`;
+      } 
     }
   }
   container.innerHTML = html;
 }
-
-let popUp = document.getElementById("popUp");
 
 popUp.addEventListener("click", (event) => {
   if (event.target === popUp) {
@@ -246,28 +305,30 @@ function selectTabs(index) {
   infos[index].classList.add("active");
 }
 
-function arrowLeftBtn() {
-  if (currentIndex > 0) {
-    currentIndex--;
-  } else {
-    currentIndex = allPokemon.length - 1;
-  }
-  openPopUp(allPokemon[currentIndex].id);
-}
+function changePokemon(direction) {
+  let currentList = filteredPokemon.length > 0
+  ? filteredPokemon
+  : allPokemon;
 
-function arrowRightBtn() {
-  if (currentIndex < allPokemon.length - 1) {
-    currentIndex++;
-  } else {
+  currentIndex += direction;
+
+  if (currentIndex < 0) {
+    currentIndex = currentList.length - 1;
+
+  } if (currentIndex >= currentList.length) {
     currentIndex = 0;
   }
-  openPopUp(allPokemon[currentIndex].id);
+  openPopUp(currentList[currentIndex].id);
 }
 
-popUp.addEventListener("keydown", function (e) {
+function handleKeyDown(e) {
+
   if (e.key === "ArrowLeft") {
-    arrowLeftBtn();
+    changePokemon(-1);
   } else if (e.key === "ArrowRight") {
-    arrowRightBtn();
+    changePokemon(1);
   }
-});
+}
+
+popUp.addEventListener("keydown", handleKeyDown);
+

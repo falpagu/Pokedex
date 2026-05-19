@@ -1,6 +1,4 @@
-function getPokemonTemplate(pokemon) {
-  let mainType = pokemon.types[0].type.name;
-  let color = getTypeColor(mainType);
+function getPokemonTemplate(pokemon, color) {
 
   return `
             <button class="pokeCard" onclick="openPopUp(${pokemon.id})">
@@ -9,17 +7,14 @@ function getPokemonTemplate(pokemon) {
                     <h3 class="pokeTitle">${firstLetterUpperCase(pokemon.name)}</h3>
                 </div>
                 <div class="imageBg" style="background-color: ${color}"> 
-                    <img class="pokeImg" src="${pokemon.sprites.front_default}" alt="${firstLetterUpperCase(pokemon.name)}">
+                  <img class="pokeImg" src="${pokemon.image}" alt="${firstLetterUpperCase(pokemon.name)}">
                 </div>
                 <div>${renderTypes(pokemon)}</div>
           </button> 
     `;
 }
 
-function getDialogTemplate(pokemon) {
-  let mainType = pokemon.types[0].type.name;
-  let color = getTypeColor(mainType);
-
+function getDialogTemplate(pokemon, color) {
   return `
         <div class="popUpCard">  
 
@@ -28,7 +23,7 @@ function getDialogTemplate(pokemon) {
               <h3 class="popUpTitle">${firstLetterUpperCase(pokemon.name)}</h3>
             </div>
             <div class="popUpImageBg" style="background-color: ${color}"> 
-              <img class="pokePopUpImg" src="${pokemon.sprites.front_default}" alt="${firstLetterUpperCase(pokemon.name)}">
+              <img class="pokePopUpImg" src="${pokemon.image}" alt="${firstLetterUpperCase(pokemon.name)}">
             </div>
             <div>${renderTypes(pokemon)}</div>
     
@@ -40,47 +35,58 @@ function getDialogTemplate(pokemon) {
                     <button onclick="selectTabs(2)" class="tab">evo chain</button>
                 </div>
             
-                <ul class="info active">
+                <div class="info active">
                     <li><span class="label">Height</span><span class="value">: ${pokemon.height} m</span></li>
                     <li><span class="label">Weight</span><span class="value">: ${pokemon.weight} kg</span></li>
                     <li><span class="label">Abilities</span><span class="value">: ${getAbilities(pokemon)}</span></li>
                     <li><span class="label">Base experience</span><span class="value">: ${pokemon.base_experience}</span></li>
-                </ul>
+                </div>
 
-                <ul class="info">
+                <div class="info">
                      ${getStats(pokemon)}
-                </ul>
+                </div>
 
-                <ul class="info evolutionContainer">
+                <div class="info evolutionContainer">
                     
-                </ul>
+                </div>
             </div>
 
             <div class="arrows" id="arrows">
-              <button id="arrowLeft" onclick="arrowLeftBtn()">
+              <button id="arrowLeft" onclick="changePokemon(-1)">
                 <img src="./assets/icon_logos/pfeil-links.png" alt="arrow left" />
               </button>
-              <button id="arrowRight" onclick="arrowRightBtn()">
+              <button id="arrowRight" onclick="changePokemon(1)">
                 <img src="./assets/icon_logos/pfeil-right.png" alt="arrow right" />
               </button>
             </div>
-
         </div> 
     `;
 }
 
-function getEvosTemplate(evoPokemon, i, evolutions) {
-
-  let html = `
-        <div class="evoCard">
-          <img class="evoImg"
-            src="${evoPokemon.sprites.front_default}"
-            alt="${evoPokemon.name}">
-          <p> ${firstLetterUpperCase(evoPokemon.name)}</p>
-        </div>
-      `;
-        if (i < evolutions.length - 1) {
-        html += `<img class="evoArrow" src="./assets/icon_logos/arrow_double.svg" alt="arrow left"/>`;
-    }
-    return html;
+function getStatsTemplate(label, value) {
+ return `
+    <div class="stat-row">
+      <span class="label">${label}</span>
+      <div class="bar">
+        <div class="fill" style="width: ${value}%"></div>
+      </div> 
+    </div>
+  `;
 }
+
+function getEvosTemplate(evoPokemon) {
+  return `
+    <div class="evoCard">
+      <img class="evoImg"
+        src="${evoPokemon.image}"
+        alt="${evoPokemon.name}">
+      <p> ${firstLetterUpperCase(evoPokemon.name)}</p>
+    </div>
+  `;
+        
+     
+}
+
+
+
+
