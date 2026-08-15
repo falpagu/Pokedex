@@ -6,6 +6,7 @@ created as a training project during my continuing education at the [Developer A
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black) 
+![PokeAPI](https://img.shields.io/badge/PokeAPI-EF5350?logo=pokemon&logoColor=white)
  <br>
  <br>
 
